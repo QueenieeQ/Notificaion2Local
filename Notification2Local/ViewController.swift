@@ -10,18 +10,13 @@ import UserNotifications
 
 class ViewController: UIViewController {
 
-    @IBOutlet weak var datePicker:
-    UIDatePicker!
-    @IBOutlet weak var titleTextField:
-    UITextField!
-    
-    @IBOutlet weak var messageTextField:
-    UITextField!
+    @IBOutlet weak var datePicker: UIDatePicker!
+    @IBOutlet weak var titleTextField: UITextField!
+    @IBOutlet weak var messageTextField: UITextField!
     
     let notificationCenter = UNUserNotificationCenter.current()
     override func viewDidLoad() {
-        super.viewDidLoad()
-        // Do any additional setup after loading the view.
+        super.viewDidLoad()// Do any additional setup after loading the view.
         notificationCenter.requestAuthorization(options: [.alert, .sound]) {
             (premissionGrant, error) in
             if(premissionGrant){
@@ -29,43 +24,77 @@ class ViewController: UIViewController {
             }
         }
     }
-
     @IBAction func scheduleAction(_ sender: Any) {
-        
         notificationCenter.getNotificationSettings { (settings) in
-            let title = self.titleTextField.text!
-            let message = self.messageTextField.text!
-            let date = self.datePicker.date
-            
-            if( settings.authorizationStatus == .authorized){
-                let content = UNMutableNotificationContent()
-                content.title = title
-                content.body = message
+        DispatchQueue.main.async {
+                            let title = self.titleTextField.text!
+                let message = self.messageTextField.text!
+                let date = self.datePicker.date
                 
-                let dateComp = Calendar.current.dateComponents(
-                    [.year, .month, .day, .hour, .minute],
-                    from: date
-                )
-                let trigger = UNCalendarNotificationTrigger(
-                    dateMatching: dateComp,
-                    repeats: false
-                )
-                
-                let request = UNNotificationRequest(
-                    identifier: UUID().uuidString,
-                    content: content,
-                    trigger: trigger
-                )
-                self.notificationCenter.add(request) {(error) in
-                    if(error != nil){
-                        print("Error" + error.debugDescription)
-                        return
+                if( settings.authorizationStatus == .authorized){
+                    let content = UNMutableNotificationContent()
+                    content.title = title
+                    content.body = message
+                    
+                    let dateComp = Calendar.current.dateComponents(
+                        [.year, .month, .day, .hour, .minute],
+                        from: date
+                    )
+                    let trigger = UNCalendarNotificationTrigger(
+                        dateMatching: dateComp,
+                        repeats: false
+                    )
+                    let request = UNNotificationRequest(
+                        identifier: UUID().uuidString,
+                        content: content,
+                        trigger: trigger
+                    )
+                    self.notificationCenter.add(request) {(error) in
+                        if(error != nil){
+                            print("Error" + error.debugDescription)
+                            return
+                        }
                     }
+                    let ac = UIAlertController(
+                        title: "Notification Scheduled",
+                        message: "At " + formattedDate(date: date),
+                        preferredStyle: .alert)
+                    ac.addAction(UIAlertAction(
+                        title: "Ok",
+                        style: .default,
+                        handler: { (_) in }))
+                    self.present(ac, animated: true)
+                }else{
+                    let ac = UIAlertController(
+                        title: "Enable Scheduled",
+                        message: "To feature you must enable notifications in settings ",
+                        preferredStyle: .alert
+                    )
+                    let goToSettings = UIAlertAction(
+                        title: "Settingss",
+                        style: .default
+                    ){
+                        (_) in
+                        guard let settingsURL = URL(string: UIApplication.openSettingsURLString)
+                        else{
+                            return
+                        }
+                        
+                        if(UIApplication.shared.canOpenURL(settingsURL)){
+                            UIApplication.shared.open(settingsURL){ (_) in
+                                
+                            }
+                        }
+                    }
+                    ac.addAction(goToSettings)
+                    ac.addAction(UIAlertAction(
+                        title: "Ok",
+                        style: .default,
+                        handler: { (_) in }))
+                    self.present(ac, animated: true)
                 }
-                let ac = UIAlertController(title: "Notification Scheduled", message: "At " + formattedDate(date: date), preferredStyle: .alert)
-            }else{
-                
-            }
+        }
+        
     }
         
         func formattedDate(date: Date) -> String{
