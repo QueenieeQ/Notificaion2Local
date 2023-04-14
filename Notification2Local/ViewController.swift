@@ -9,11 +9,20 @@ import UIKit
 
 class ViewController: UIViewController {
 
+    @IBOutlet weak var datePicker:
+    UIDatePicker!
+    @IBOutlet weak var titleTextField:
+    UITextField!
+    
+    @IBOutlet weak var messageTextField:
+    UITextField!
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
     }
 
-
+    @IBAction func scheduleAction(_ sender: Any) {
+    }
+    
 }
 
