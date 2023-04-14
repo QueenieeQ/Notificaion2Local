@@ -15,23 +15,28 @@ class ViewController: UIViewController {
     @IBOutlet weak var messageTextField: UITextField!
     
     let notificationCenter = UNUserNotificationCenter.current()
+    
     override func viewDidLoad() {
-        super.viewDidLoad()// Do any additional setup after loading the view.
+        super.viewDidLoad()
+        
         notificationCenter.requestAuthorization(options: [.alert, .sound]) {
             (premissionGrant, error) in
-            if(premissionGrant){
+            if(!premissionGrant){
                 print("Permission Denied")
             }
         }
     }
     @IBAction func scheduleAction(_ sender: Any) {
+        
         notificationCenter.getNotificationSettings { (settings) in
+            
         DispatchQueue.main.async {
-                            let title = self.titleTextField.text!
+                let title = self.titleTextField.text!
                 let message = self.messageTextField.text!
                 let date = self.datePicker.date
                 
-                if( settings.authorizationStatus == .authorized){
+                if( settings.authorizationStatus == .authorized)
+            {
                     let content = UNMutableNotificationContent()
                     content.title = title
                     content.body = message
@@ -49,41 +54,46 @@ class ViewController: UIViewController {
                         content: content,
                         trigger: trigger
                     )
-                    self.notificationCenter.add(request) {(error) in
-                        if(error != nil){
+                    self.notificationCenter.add(request) { (error) in
+                        if(error != nil)
+                        {
                             print("Error" + error.debugDescription)
                             return
                         }
                     }
                     let ac = UIAlertController(
                         title: "Notification Scheduled",
-                        message: "At " + formattedDate(date: date),
+                        message: "At " + self.formattedDate(date: date),
                         preferredStyle: .alert)
                     ac.addAction(UIAlertAction(
                         title: "Ok",
                         style: .default,
                         handler: { (_) in }))
-                    self.present(ac, animated: true)
-                }else{
+                    self.present(
+                        ac,
+                        animated: true
+                    )
+            }
+            else
+            {
                     let ac = UIAlertController(
-                        title: "Enable Scheduled",
+                        title: "Enable Notification?",
                         message: "To feature you must enable notifications in settings ",
                         preferredStyle: .alert
                     )
                     let goToSettings = UIAlertAction(
                         title: "Settingss",
                         style: .default
-                    ){
-                        (_) in
+                    ){ (_) in
                         guard let settingsURL = URL(string: UIApplication.openSettingsURLString)
-                        else{
+                        else
+                        {
                             return
                         }
                         
-                        if(UIApplication.shared.canOpenURL(settingsURL)){
-                            UIApplication.shared.open(settingsURL){ (_) in
-                                
-                            }
+                        if(UIApplication.shared.canOpenURL(settingsURL))
+                        {
+                            UIApplication.shared.open(settingsURL){ (_) in}
                         }
                     }
                     ac.addAction(goToSettings)
@@ -96,13 +106,11 @@ class ViewController: UIViewController {
         }
         
     }
-        
-        func formattedDate(date: Date) -> String{
-            let formatter = DateFormatter()
-            formatter.dateFormat = "dd MM yy HH:mm"
-            return formatter.string(from: date)
-        }
-    
+}
+    func formattedDate(date: Date) -> String{
+        let formatter = DateFormatter()
+        formatter.dateFormat = "dd MM yy HH:mm"
+        return formatter.string(from: date)
     }
 }
 
